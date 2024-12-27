@@ -6,7 +6,8 @@
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            var navigationPage = new NavigationPage(new Views.StartScreen());
+            MainPage = navigationPage;
         }
     }
 }
