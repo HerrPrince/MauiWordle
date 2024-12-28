@@ -63,6 +63,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\GameScreen.xaml.cs">
+	    <DependentUpon>GameScreen.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\GameScreen.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\StartScreen.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

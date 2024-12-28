@@ -1,4 +1,6 @@
-﻿namespace WordleApp
+﻿using Microsoft.Maui.Controls;
+
+namespace WordleApp
 {
     public partial class App : Application
     {
@@ -6,8 +8,8 @@
         {
             InitializeComponent();
 
-            var navigationPage = new NavigationPage(new Views.StartScreen());
-            MainPage = navigationPage;
+            // Set the AppShell as the main page
+            MainPage = new AppShell();
         }
     }
 }

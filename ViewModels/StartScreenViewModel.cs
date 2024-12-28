@@ -45,10 +45,18 @@ namespace WordleApp.ViewModels
         public ICommand OpenSettingsCommand { get; }
 
         // Command Methods
-        private void StartGame()
+        private async void StartGame()
         {
-            // Navigate to the game page
-            Application.Current.MainPage.DisplayAlert("Navigation", "Start Game clicked!", "OK");
+            try
+            {
+                // Navigate to the Game Screen using an absolute route
+                await Shell.Current.GoToAsync("///GameScreen");
+            }
+            catch (Exception ex)
+            {
+                // Handle navigation exceptions
+                Console.WriteLine($"Navigation failed: {ex.Message}");
+            }
         }
 
         private void ViewHistory()
