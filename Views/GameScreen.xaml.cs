@@ -9,105 +9,288 @@ namespace WordleApp.Views
 {
     public partial class GameScreen : ContentPage
     {
-        private const string WordsUrl = "https://raw.githubusercontent.com/DonH-ITS/jsonfiles/main/words.txt";
-        private const string WordsFileName = "words.txt";
-        private string _targetWord;
-        private string[] _wordList;
+        private readonly int Rows = 6; // Number of attempts
+        private readonly int Columns = 5; // Number of letters in the word
+        private string TargetWord = "APPLE"; // Example word to guess
+        private int CurrentRow = 0;
+        private int CurrentColumn = 0;
+
+        private Dictionary<string, Button> KeyboardButtons = new Dictionary<string, Button>();
 
         public GameScreen()
         {
             InitializeComponent();
-
-            LoadWordListAsync();
+            BuildLetterGrid();
+            BuildKeyboard();
         }
 
-        private async void LoadWordListAsync()
+        // Build the letter grid dynamically
+        private void BuildLetterGrid()
         {
-            string filePath = Path.Combine(FileSystem.AppDataDirectory, WordsFileName);
-
-            if (!File.Exists(filePath))
+            for (int row = 0; row < Rows; row++)
             {
-                try
+                for (int col = 0; col < Columns; col++)
                 {
-                    using var httpClient = new HttpClient();
-                    string wordData = await httpClient.GetStringAsync(WordsUrl);
-                    await File.WriteAllTextAsync(filePath, wordData);
+                    // Create the Label with dynamic font size adjustment
+                    var label = new Label
+                    {
+                        Text = "",
+                        FontSize = 18, // Initial font size
+                        HorizontalTextAlignment = TextAlignment.Center,
+                        VerticalTextAlignment = TextAlignment.Center,
+                        TextColor = Colors.White,
+                        LineBreakMode = LineBreakMode.NoWrap
+                    };
+
+                    // Create the Frame that holds the Label
+                    var box = new Frame
+                    {
+                        BackgroundColor = Colors.Black,
+                        BorderColor = Colors.Gray,
+                        CornerRadius = 0, // To make it look square
+                        WidthRequest = 50,
+                        HeightRequest = 50,
+                        Padding = 0, // Remove extra padding
+                        Content = label
+                    };
+
+                    // Set the row and column in the grid
+                    Grid.SetRow(box, row);
+                    Grid.SetColumn(box, col);
+                    LetterGrid.Children.Add(box);
                 }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", $"Failed to download word list: {ex.Message}", "OK");
-                    return;
-                }
-            }
-
-            _wordList = await File.ReadAllLinesAsync(filePath);
-
-            Random random = new Random();
-            _targetWord = _wordList[random.Next(_wordList.Length)].Trim().ToUpper();
-
-            DebugWordLabel.Text = $"Debug: Target Word = {_targetWord}";
-        }
-
-        private void OnLetterChanged(object sender, TextChangedEventArgs e)
-        {
-            var currentBox = sender as Entry;
-
-            // Handle backspace
-            if (string.IsNullOrWhiteSpace(e.NewTextValue) && !string.IsNullOrWhiteSpace(e.OldTextValue))
-            {
-                if (currentBox == Letter5) Letter4.Focus();
-                else if (currentBox == Letter4) Letter3.Focus();
-                else if (currentBox == Letter3) Letter2.Focus();
-                else if (currentBox == Letter2) Letter1.Focus();
-                return;
-            }
-
-            // Automatically move to the next box after valid input
-            if (e.NewTextValue?.Length == 1)
-            {
-                if (currentBox == Letter1) Letter2.Focus();
-                else if (currentBox == Letter2) Letter3.Focus();
-                else if (currentBox == Letter3) Letter4.Focus();
-                else if (currentBox == Letter4) Letter5.Focus();
-                else if (currentBox == Letter5) Letter5.Unfocus(); // Last letter
             }
         }
-
-        private void OnSubmitGuess(object sender, EventArgs e)
+        private void BuildKeyboard()
         {
-            string guess = $"{Letter1.Text}{Letter2.Text}{Letter3.Text}{Letter4.Text}{Letter5.Text}".ToUpper();
+            // Rows of letters and the special buttons row
+            string[] rows = { "QWERTYUIOP", "ASDFGHJKL" };
 
-            if (guess.Length != 5)
+            // Create a stack layout for the keyboard
+            var keyboardLayout = new VerticalStackLayout
             {
-                DisplayAlert("Invalid Guess", "Please enter all 5 letters.", "OK");
-                return;
-            }
-
-            // Example feedback logic
-            FeedbackArea.Children.Add(new Label
-            {
-                Text = $"Your guess: {guess}",
-                FontSize = 18
-            });
-
-            // Clear the boxes for the next guess
-            Letter1.Text = Letter2.Text = Letter3.Text = Letter4.Text = Letter5.Text = string.Empty;
-            Letter1.Focus();
-        }
-
-
-
-        private Entry GetBoxByIndex(int index)
-        {
-            return index switch
-            {
-                0 => Letter1,
-                1 => Letter2,
-                2 => Letter3,
-                3 => Letter4,
-                4 => Letter5,
-                _ => null
+                Spacing = 10,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.End
             };
+
+            // Build the first two rows of letters
+            for (int rowIndex = 0; rowIndex < rows.Length; rowIndex++)
+            {
+                string row = rows[rowIndex];
+
+                var rowLayout = new HorizontalStackLayout
+                {
+                    Spacing = 5,
+                    HorizontalOptions = LayoutOptions.Center
+                };
+
+                foreach (char letter in row)
+                {
+                    string letterString = letter.ToString();
+
+                    var keyButton = new Button
+                    {
+                        Text = letterString,
+                        FontSize = 18,
+                        BackgroundColor = Colors.Gray,
+                        TextColor = Colors.White,
+                        CornerRadius = 5,
+                        WidthRequest = 40,
+                        HeightRequest = 50,
+                        Margin = new Thickness(2),
+                        Command = new Command(() => OnKeyPressed(letterString))
+                    };
+
+                    KeyboardButtons[letterString] = keyButton;
+                    rowLayout.Children.Add(keyButton);
+                }
+
+                keyboardLayout.Children.Add(rowLayout);
+            }
+
+            // Add the last row with "Enter", letters, and "Delete"
+            var lastRowLayout = new HorizontalStackLayout
+            {
+                Spacing = 5,
+                HorizontalOptions = LayoutOptions.Center
+            };
+
+            // Add the "Enter" button
+            var enterButton = new Button
+            {
+                Text = "Enter",
+                FontSize = 16,
+                BackgroundColor = Colors.Gray,
+                TextColor = Colors.White,
+                CornerRadius = 5,
+                WidthRequest = 80, // Adjusted width for better fit
+                HeightRequest = 50,
+                Margin = new Thickness(2),
+                IsEnabled = false, // Initially disabled
+                Command = new Command(OnEnterPressed)
+            };
+            KeyboardButtons["Enter"] = enterButton;
+            lastRowLayout.Children.Add(enterButton);
+
+            // Add the letter keys for the last row
+            string lastRowLetters = "ZXCVBNM";
+            foreach (char letter in lastRowLetters)
+            {
+                string letterString = letter.ToString();
+
+                var keyButton = new Button
+                {
+                    Text = letterString,
+                    FontSize = 18,
+                    BackgroundColor = Colors.Gray,
+                    TextColor = Colors.White,
+                    CornerRadius = 5,
+                    WidthRequest = 40,
+                    HeightRequest = 50,
+                    Margin = new Thickness(2),
+                    Command = new Command(() => OnKeyPressed(letterString))
+                };
+
+                KeyboardButtons[letterString] = keyButton;
+                lastRowLayout.Children.Add(keyButton);
+            }
+
+            // Add the "Delete" button
+            var deleteButton = new Button
+            {
+                Text = "Delete",
+                FontSize = 16,
+                BackgroundColor = Colors.Gray,
+                TextColor = Colors.White,
+                CornerRadius = 5,
+                WidthRequest = 80, // Adjusted width for better fit
+                HeightRequest = 50,
+                Margin = new Thickness(2),
+                IsEnabled = false, // Initially disabled
+                Command = new Command(OnDeletePressed)
+            };
+            KeyboardButtons["Delete"] = deleteButton;
+            lastRowLayout.Children.Add(deleteButton);
+
+            keyboardLayout.Children.Add(lastRowLayout);
+
+            // Add the keyboard layout to the main content
+            KeyboardGrid.Children.Clear(); // Clear any existing grid children
+            KeyboardGrid.Add(keyboardLayout);
+        }
+        private void OnEnterPressed()
+        {
+            // Process the current word
+            string currentWord = string.Concat(
+                LetterGrid.Children
+                    .OfType<Label>()
+                    .Where(lbl => Grid.GetRow(lbl) == CurrentRow)
+                    .Select(lbl => lbl.Text)
+            );
+
+            if (currentWord.Length != Columns)
+            {
+                DisplayAlert("Error", "Complete the word before submitting.", "OK");
+                return;
+            }
+
+            // Compare the word or perform your game logic
+            CheckWord();
+            CurrentRow++;
+            CurrentColumn = 0;
+
+            // Disable the "Enter" button after submission
+            KeyboardButtons["Enter"].IsEnabled = false;
+        }
+
+        private void OnDeletePressed()
+        {
+            if (CurrentColumn > 0)
+            {
+                // Move to the previous box
+                CurrentColumn--;
+
+                // Get the target frame and its content (Label)
+                var targetFrame = LetterGrid.Children
+                    .OfType<Frame>()
+                    .FirstOrDefault(frame => Grid.GetRow(frame) == CurrentRow && Grid.GetColumn(frame) == CurrentColumn);
+
+                if (targetFrame != null && targetFrame.Content is Label targetLabel)
+                {
+                    // Clear the text in the label
+                    targetLabel.Text = string.Empty;
+
+                    // If no more input to delete, reset the "Delete" button color
+                    if (CurrentColumn == 0)
+                    {
+                        KeyboardButtons["Delete"].IsEnabled = false;
+                    }
+
+                }
+            }
+
+            // Always reset the "Enter" button's color and disable it if the word is incomplete
+            if (CurrentColumn < Columns)
+            {
+                KeyboardButtons["Enter"].IsEnabled = false;
+            }
+        }
+
+        // Handle keyboard button presses
+        private void OnKeyPressed(string letter)
+        {
+            if (CurrentRow >= Rows || CurrentColumn >= Columns) return;
+
+            // Get the target frame for the current cell
+            var targetFrame = LetterGrid.Children
+                .OfType<Frame>()
+                .FirstOrDefault(frame => Grid.GetRow(frame) == CurrentRow && Grid.GetColumn(frame) == CurrentColumn);
+
+            if (targetFrame != null && targetFrame.Content is Label targetLabel)
+            {
+                // Update the text in the label
+                targetLabel.Text = letter.ToUpper();
+                CurrentColumn++;
+
+                // Enable "Enter" if the word is complete
+                if (CurrentColumn == Columns)
+                {
+                    KeyboardButtons["Enter"].IsEnabled = true;
+                    KeyboardButtons["Enter"].BackgroundColor = Colors.Green;
+                }
+
+                // Enable and change the "Delete" button color to red if there's input to delete
+                if (CurrentColumn > 0)
+                {
+                    KeyboardButtons["Delete"].BackgroundColor = Colors.Red;
+                    KeyboardButtons["Delete"].IsEnabled = true;
+                }
+            }
+        }
+
+        private void CheckWord()
+        {
+            // Get the guessed word from the current row
+            string guessedWord = string.Concat(
+                LetterGrid.Children
+                    .OfType<Label>()
+                    .Where(lbl => Grid.GetRow(lbl) == CurrentRow)
+                    .Select(lbl => lbl.Text)
+            );
+
+            // Compare to target word and disable keys as necessary
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                string guessedLetter = guessedWord[i].ToString();
+                if (!TargetWord.Contains(guessedLetter))
+                {
+                    if (KeyboardButtons.TryGetValue(guessedLetter, out Button button))
+                    {
+                        button.IsEnabled = false;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,91 +1,43 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WordleApp.Views.GameScreen"
+             BackgroundColor="Black"
              Title="Wordle - Game">
 
     <ContentPage.Content>
-        <StackLayout Padding="20" Spacing="15" VerticalOptions="Center">
-            <!-- Title -->
-            <Label Text="Wordle Game" 
-                   FontSize="30" 
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center" />
-
-            <!-- Row for the 5 letter inputs -->
-            <Grid ColumnSpacing="10" HorizontalOptions="Center">
+        <VerticalStackLayout Spacing="20" Padding="10">
+            <!-- Letter Grid -->
+            <Grid x:Name="LetterGrid" HorizontalOptions="Center" VerticalOptions="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50" />
-                    <ColumnDefinition Width="50" />
-                    <ColumnDefinition Width="50" />
-                    <ColumnDefinition Width="50" />
-                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-
-                <!-- Each Entry corresponds to a letter -->
-                <Entry x:Name="Letter1" 
-       MaxLength="1" 
-       FontSize="24" 
-       TextTransform="Uppercase"
-       HorizontalTextAlignment="Center" 
-       VerticalTextAlignment="Center" 
-       Grid.Column="0" 
-       TextChanged="OnLetterChanged" />
-
-                <Entry x:Name="Letter2" 
-       MaxLength="1" 
-       FontSize="24" 
-       TextTransform="Uppercase"
-       HorizontalTextAlignment="Center" 
-       VerticalTextAlignment="Center" 
-       Grid.Column="1" 
-       TextChanged="OnLetterChanged" />
-
-                <Entry x:Name="Letter3" 
-       MaxLength="1" 
-       FontSize="24" 
-       TextTransform="Uppercase"
-       HorizontalTextAlignment="Center" 
-       VerticalTextAlignment="Center" 
-       Grid.Column="2" 
-       TextChanged="OnLetterChanged" />
-
-                <Entry x:Name="Letter4" 
-       MaxLength="1" 
-       FontSize="24" 
-       TextTransform="Uppercase"
-       HorizontalTextAlignment="Center" 
-       VerticalTextAlignment="Center" 
-       Grid.Column="3" 
-       TextChanged="OnLetterChanged" />
-
-                <Entry x:Name="Letter5" 
-       MaxLength="1" 
-       FontSize="24" 
-       TextTransform="Uppercase"
-       HorizontalTextAlignment="Center" 
-       VerticalTextAlignment="Center" 
-       Grid.Column="4" 
-       TextChanged="OnLetterChanged" />
+                <!-- Populate the grid dynamically in code-behind -->
             </Grid>
 
-            <!-- Submit Button -->
-            <Button Text="Submit Guess" 
-                    Clicked="OnSubmitGuess" />
-
-            <!-- Feedback Area -->
-            <ScrollView>
-                <StackLayout x:Name="FeedbackArea" Spacing="10">
-                    <!-- Feedback for guesses will be added dynamically -->
-                </StackLayout>
-            </ScrollView>
-
-            <!-- Debug Area for Word Display -->
-            <Label x:Name="DebugWordLabel" 
-                   Text="Debug: Target Word = [Hidden]" 
-                   FontSize="12" 
-                   TextColor="Gray" 
-                   HorizontalOptions="Center" 
-                   IsVisible="False" />
-        </StackLayout>
+            <!-- Keyboard -->
+            <Grid x:Name="KeyboardGrid" HorizontalOptions="Center" VerticalOptions="End" RowSpacing="5" ColumnSpacing="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <!-- Use dynamic column spacing -->
+                </Grid.ColumnDefinitions>
+                <!-- Populate dynamically in code-behind -->
+            </Grid>
+        </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>
