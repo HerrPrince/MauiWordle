@@ -75,13 +75,17 @@ namespace WordleApp.ViewModels
                 Console.WriteLine($"Navigation to HistoryScreen failed: {ex.Message}");
             }
         }
-
-        private void OpenSettings()
+        private async void OpenSettings()
         {
-            // Navigate to the settings page
-            Application.Current.MainPage.DisplayAlert("Navigation", "Settings clicked!", "OK");
+            try
+            {
+                await Shell.Current.GoToAsync("SettingsScreen");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Navigation to SettingsScreen failed: {ex.Message}");
+            }
         }
-
         private bool CanStartGame()
         {
             return !string.IsNullOrWhiteSpace(PlayerName);

@@ -7,5 +7,6 @@
     <ShellContent Title="Start" Route="StartScreen" ContentTemplate="{DataTemplate local:StartScreen}" />
     <ShellContent Title="Game" Route="GameScreen" ContentTemplate="{DataTemplate local:GameScreen}" />
     <ShellContent Title="History" Route="HistoryScreen" ContentTemplate="{DataTemplate local:HistoryScreen}" />
+    <ShellContent Title="Settings" Route="SettingsScreen" ContentTemplate="{DataTemplate local:SettingsScreen}" />
 
 </Shell>

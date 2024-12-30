@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using WordleApp.Services;
+using WordleApp.Models;
 
 namespace WordleApp.Views
 {
@@ -73,14 +75,13 @@ namespace WordleApp.Views
             {
                 Random random = new();
                 TargetWord = WordList.ElementAt(random.Next(WordList.Count));
-                Console.WriteLine($"TargetWord: {TargetWord}"); // Debugging
+                await DisplayAlert("Word", $"TargetWord: {TargetWord}", "OK"); // Debugging
             }
             else
             {
                 await DisplayAlert("Error", "Word list is empty. Please reload the app.", "OK");
             }
         }
-
         // Build the letter grid dynamically
         private void BuildLetterGrid()
         {
@@ -311,7 +312,6 @@ namespace WordleApp.Views
                 KeyboardButtons["Enter"].IsEnabled = false;
             }
         }
-
         // Handle keyboard button presses
         private void OnKeyPressed(string letter)
         {
@@ -349,7 +349,6 @@ namespace WordleApp.Views
                 }
             }
         }
-
         private void CheckWord()
         {
             // Get the guessed word from the current row
@@ -359,6 +358,41 @@ namespace WordleApp.Views
                     .Where(frame => Grid.GetRow(frame) == CurrentRow)
                     .Select(frame => (frame.Content as Label)?.Text ?? "")
             );
+
+            if (guessedWord.Equals(TargetWord, StringComparison.OrdinalIgnoreCase))
+            {
+                // Stop the timer
+                _gameTimer?.Stop();
+
+                // Disable all keyboard inputs
+                foreach (var button in KeyboardButtons.Values)
+                {
+                    button.IsEnabled = false;
+                }
+
+                // Update the timer label to "YOU WIN"
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    PlayerNameLabel.Text = "YOU WIN!";
+                    ElapsedTimeLabel.IsVisible = false;
+                    PlayAgainButton.IsVisible = true;
+                });
+
+                // Show congratulations popup
+                TimeSpan elapsedTime = DateTime.Now - _startTime;
+                DisplayCongratulationsPopup(elapsedTime);
+
+                // Save the record
+                GameHistoryService.SaveRecord(new GameRecord
+                {
+                    PlayerName = PlayerName,
+                    ElapsedTime = elapsedTime,
+                    Attempts = CurrentRow + 1,
+                    PlayedAt = DateTime.Now
+                });
+
+                return;
+            }
 
             // Create a copy of the target word to track matches
             char[] targetWordArray = TargetWord.ToUpper().ToCharArray();
@@ -448,7 +482,53 @@ namespace WordleApp.Views
                 }
             }
         }
-    private void StartGameTimer()
+        private async void DisplayCongratulationsPopup(TimeSpan elapsedTime)
+        {
+            string message = $"Congratulations, {PlayerName}!\n" +
+                             $"Time: {elapsedTime:mm\\:ss}\n" +
+                             $"Attempts: {CurrentRow + 1}";
+
+            await DisplayAlert("You Win!", message, "OK");
+        }
+        private void OnPlayAgainClicked(object sender, EventArgs e)
+        {
+            // Reset the game
+            ResetGame();
+
+            // Show the elapsed time and hide the "Play Again" button
+            ElapsedTimeLabel.IsVisible = true;
+            PlayAgainButton.IsVisible = false;
+        }
+        private void ResetGame()
+        {
+            // Reset game state
+            CurrentRow = 0;
+            CurrentColumn = 0;
+            TargetWord = WordList.ElementAt(new Random().Next(WordList.Count));
+            DisplayAlert("Word", $"TargetWord: {TargetWord}", "OK"); // Debugging
+
+            // Clear the grid
+            foreach (var frame in LetterGrid.Children.OfType<Frame>())
+            {
+                if (frame.Content is Label label)
+                {
+                    label.Text = string.Empty;
+                }
+
+                frame.BackgroundColor = Colors.Black;
+            }
+
+            // Reset the keyboard
+            foreach (var button in KeyboardButtons.Values)
+            {
+                button.IsEnabled = true;
+                //button.BackgroundColor = Colors.Gray;
+            }
+
+            // Restart the timer
+            StartGameTimer();
+        }
+        private void StartGameTimer()
         {
             _startTime = DateTime.Now;
 
@@ -466,12 +546,5 @@ namespace WordleApp.Views
                 ElapsedTimeLabel.Text = $"Elapsed Time: {elapsed:mm\\:ss}";
             });
         }
-        //protected override void OnDisappearing()
-        //{
-        //    base.OnDisappearing();
-        //    _gameTimer?.Stop();
-        //    _gameTimer?.Dispose();
-        //}
-
     }
 }

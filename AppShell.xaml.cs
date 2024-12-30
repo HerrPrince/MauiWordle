@@ -9,7 +9,7 @@ namespace WordleApp
             InitializeComponent();
             Routing.RegisterRoute("GameScreen", typeof(GameScreen));
             Routing.RegisterRoute("HistoryScreen", typeof(HistoryScreen));
-
+            Routing.RegisterRoute("SettingsScreen", typeof(SettingsScreen));
         }
     }
 }

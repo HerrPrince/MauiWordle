@@ -13,6 +13,9 @@
                 <!-- Elapsed Time -->
                 <Label x:Name="ElapsedTimeLabel" Text="Elapsed Time: 00:00" FontSize="18" HorizontalOptions="Center" VerticalOptions="Start" />
 
+                <!-- Play Again Button -->
+                <Button x:Name="PlayAgainButton" Text="Play Again" FontSize="16" HorizontalOptions="Center" VerticalOptions="Start" IsVisible="False" Clicked="OnPlayAgainClicked" />
+
             </VerticalStackLayout>
             <!-- Letter Grid -->
             <Grid x:Name="LetterGrid" HorizontalOptions="Center" VerticalOptions="Center">

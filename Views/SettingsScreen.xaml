@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WordleApp.Views.SettingsScreen"
+             Title="Wordle - Settings"
+             BackgroundColor="Black">
+
+    <ContentPage.Content>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            <Label Text="Settings"
+                   FontSize="24"
+                   HorizontalOptions="Center"
+                   TextColor="Black" />
+
+            <!-- Add your settings options here -->
+            <Label Text="Option 1"
+                   FontSize="18"
+                   TextColor="Black" />
+            <Switch x:Name="Option1Switch" />
+
+            <Label Text="Option 2"
+                   FontSize="18"
+                   TextColor="Black" />
+            <Switch x:Name="Option2Switch" />
+
+            <!-- Back Button -->
+            <Button Text="Back"
+                    FontSize="18"
+                    BackgroundColor="LightGray"
+                    TextColor="Black"
+                    HorizontalOptions="Center"
+                    Clicked="OnBackButtonClicked" />
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>
