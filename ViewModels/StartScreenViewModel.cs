@@ -36,7 +36,6 @@ namespace WordleApp.ViewModels
                 _isNameEntered = value;
                 OnPropertyChanged();
                 ((Command)StartGameCommand).ChangeCanExecute();
-                ((Command)ViewHistoryCommand).ChangeCanExecute();
             }
         }
 
@@ -69,13 +68,7 @@ namespace WordleApp.ViewModels
         {
             try
             {
-                // Pass PlayerName as a navigation parameter
-                var navigationParams = new Dictionary<string, object>
-        {
-            { "playerName", PlayerName }
-        };
-
-                await Shell.Current.GoToAsync("HistoryScreen", navigationParams);
+                await Shell.Current.GoToAsync("HistoryScreen");
             }
             catch (Exception ex)
             {
