@@ -3,15 +3,31 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
 
 namespace WordleApp.Views
 {
+    [QueryProperty(nameof(PlayerName), "playerName")]
     public partial class GameScreen : ContentPage
     {
+        private string _playerName;
+
+        public string PlayerName
+        {
+            get => _playerName;
+            set
+            {
+                _playerName = value;
+                OnPropertyChanged();
+                PlayerNameLabel.Text = $"Current Player: {_playerName}"; // Display the player name
+            }
+        }
+
+        private DateTime _startTime;
+        private System.Timers.Timer _gameTimer;
         private readonly int Rows = 6; // Number of attempts
         private readonly int Columns = 5; // Number of letters in the word
-        private string TargetWord = "APPLE"; // Example word to guess
+        private string TargetWord = "";
+        private HashSet<string> WordList = new(); // Set of valid words
         private int CurrentRow = 0;
         private int CurrentColumn = 0;
 
@@ -20,8 +36,49 @@ namespace WordleApp.Views
         public GameScreen()
         {
             InitializeComponent();
+            LoadWordListAsync();
             BuildLetterGrid();
             BuildKeyboard();
+            StartGameTimer();
+        }
+
+        // Download or load the word list
+        private async void LoadWordListAsync()
+        {
+            string wordListUrl = "https://raw.githubusercontent.com/DonH-ITS/jsonfiles/main/words.txt";
+            string localFilePath = Path.Combine(FileSystem.CacheDirectory, "words.txt");
+
+            // Check if the file exists locally
+            if (!File.Exists(localFilePath))
+            {
+                // Download the file
+                try
+                {
+                    using HttpClient client = new();
+                    string wordListContent = await client.GetStringAsync(wordListUrl);
+                    File.WriteAllText(localFilePath, wordListContent);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"Failed to download word list: {ex.Message}", "OK");
+                    return;
+                }
+            }
+
+            // Load words into a HashSet for quick lookups
+            WordList = new HashSet<string>(File.ReadAllLines(localFilePath).Select(word => word.Trim().ToUpper()));
+
+            // Randomly choose a target word
+            if (WordList.Count > 0)
+            {
+                Random random = new();
+                TargetWord = WordList.ElementAt(random.Next(WordList.Count));
+                Console.WriteLine($"TargetWord: {TargetWord}"); // Debugging
+            }
+            else
+            {
+                await DisplayAlert("Error", "Word list is empty. Please reload the app.", "OK");
+            }
         }
 
         // Build the letter grid dynamically
@@ -89,6 +146,9 @@ namespace WordleApp.Views
                 {
                     string letterString = letter.ToString();
 
+                    // Create a local copy to avoid closure issues
+                    var localLetterString = letterString;
+
                     var keyButton = new Button
                     {
                         Text = letterString,
@@ -99,10 +159,14 @@ namespace WordleApp.Views
                         WidthRequest = 40,
                         HeightRequest = 50,
                         Margin = new Thickness(2),
-                        Command = new Command(() => OnKeyPressed(letterString))
+                        Command = new Command(() =>
+                        {
+                            // OnKeyPressed should handle the key validation and input logic
+                            OnKeyPressed(localLetterString);
+                        })
                     };
 
-                    KeyboardButtons[letterString] = keyButton;
+                    KeyboardButtons[localLetterString] = keyButton;
                     rowLayout.Children.Add(keyButton);
                 }
 
@@ -149,7 +213,10 @@ namespace WordleApp.Views
                     WidthRequest = 40,
                     HeightRequest = 50,
                     Margin = new Thickness(2),
-                    Command = new Command(() => OnKeyPressed(letterString))
+                    Command = new Command(() =>
+                    {
+                        OnKeyPressed(letterString); // Directly pass the letter to the method
+                    })
                 };
 
                 KeyboardButtons[letterString] = keyButton;
@@ -179,19 +246,27 @@ namespace WordleApp.Views
             KeyboardGrid.Children.Clear(); // Clear any existing grid children
             KeyboardGrid.Add(keyboardLayout);
         }
-        private void OnEnterPressed()
+        private async void OnEnterPressed()
         {
-            // Process the current word
-            string currentWord = string.Concat(
+            // Collect the word from the current row
+            var currentWord = string.Concat(
                 LetterGrid.Children
-                    .OfType<Label>()
-                    .Where(lbl => Grid.GetRow(lbl) == CurrentRow)
-                    .Select(lbl => lbl.Text)
+                    .OfType<Frame>()
+                    .Where(frame => Grid.GetRow(frame) == CurrentRow)
+                    .Select(frame => (frame.Content as Label)?.Text ?? "") // Get the Label text or empty string
             );
 
-            if (currentWord.Length != Columns)
+            // Check if the word is incomplete
+            if (currentWord.Length != Columns || currentWord.Any(c => string.IsNullOrEmpty(c.ToString())))
             {
-                DisplayAlert("Error", "Complete the word before submitting.", "OK");
+                await DisplayAlert("Error", "Complete the word before submitting.", "OK");
+                return;
+            }
+
+            // Check if the word exists in the word list
+            if (!WordList.Contains(currentWord))
+            {
+                await DisplayAlert("Invalid Word", "This word is not in the word list. Try again.", "OK");
                 return;
             }
 
@@ -202,8 +277,8 @@ namespace WordleApp.Views
 
             // Disable the "Enter" button after submission
             KeyboardButtons["Enter"].IsEnabled = false;
+            KeyboardButtons["Delete"].IsEnabled = false;
         }
-
         private void OnDeletePressed()
         {
             if (CurrentColumn > 0)
@@ -240,6 +315,12 @@ namespace WordleApp.Views
         // Handle keyboard button presses
         private void OnKeyPressed(string letter)
         {
+            // Check if the button is disabled
+            if (KeyboardButtons.TryGetValue(letter, out Button button) && !button.IsEnabled)
+            {
+                return; // Do nothing if the button is disabled
+            }
+
             if (CurrentRow >= Rows || CurrentColumn >= Columns) return;
 
             // Get the target frame for the current cell
@@ -274,23 +355,123 @@ namespace WordleApp.Views
             // Get the guessed word from the current row
             string guessedWord = string.Concat(
                 LetterGrid.Children
-                    .OfType<Label>()
-                    .Where(lbl => Grid.GetRow(lbl) == CurrentRow)
-                    .Select(lbl => lbl.Text)
+                    .OfType<Frame>()
+                    .Where(frame => Grid.GetRow(frame) == CurrentRow)
+                    .Select(frame => (frame.Content as Label)?.Text ?? "")
             );
 
-            // Compare to target word and disable keys as necessary
+            // Create a copy of the target word to track matches
+            char[] targetWordArray = TargetWord.ToUpper().ToCharArray();
+            bool[] matched = new bool[Columns]; // Track matched letters to prevent duplicate marking
+            bool[] guessedMatched = new bool[Columns]; // Track guessed word letters already matched
+
+            // First pass: Check for correct letters in the correct positions (Green)
             for (int i = 0; i < guessedWord.Length; i++)
             {
-                string guessedLetter = guessedWord[i].ToString();
-                if (!TargetWord.Contains(guessedLetter))
+                if (i < targetWordArray.Length && guessedWord[i] == targetWordArray[i])
                 {
-                    if (KeyboardButtons.TryGetValue(guessedLetter, out Button button))
+                    matched[i] = true;
+                    guessedMatched[i] = true;
+
+                    // Update grid box to Green
+                    var targetFrame = LetterGrid.Children
+                        .OfType<Frame>()
+                        .FirstOrDefault(frame => Grid.GetRow(frame) == CurrentRow && Grid.GetColumn(frame) == i);
+
+                    if (targetFrame != null)
                     {
+                        targetFrame.BackgroundColor = Colors.Green;
+                    }
+
+                    // Update the corresponding keyboard button's color if not already Green
+                    if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.BackgroundColor != Colors.Green)
+                    {
+                        button.BackgroundColor = Colors.Green;
+                    }
+                }
+            }
+
+            // Second pass: Check for correct letters in the wrong positions (Golden)
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                if (i < targetWordArray.Length && !guessedMatched[i]) // Skip already matched letters
+                {
+                    for (int j = 0; j < targetWordArray.Length; j++)
+                    {
+                        if (!matched[j] && guessedWord[i] == targetWordArray[j])
+                        {
+                            matched[j] = true;
+                            guessedMatched[i] = true;
+
+                            // Update grid box to Golden
+                            var targetFrame = LetterGrid.Children
+                                .OfType<Frame>()
+                                .FirstOrDefault(frame => Grid.GetRow(frame) == CurrentRow && Grid.GetColumn(frame) == i);
+
+                            if (targetFrame != null)
+                            {
+                                targetFrame.BackgroundColor = Colors.Gold;
+                            }
+
+                            // Update the corresponding keyboard button's color if not already Green
+                            if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.BackgroundColor != Colors.Green)
+                            {
+                                button.BackgroundColor = Colors.Gold;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Third pass: Mark incorrect letters (DarkGray)
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                if (!guessedMatched[i]) // If the letter wasn't matched
+                {
+                    var targetFrame = LetterGrid.Children
+                        .OfType<Frame>()
+                        .FirstOrDefault(frame => Grid.GetRow(frame) == CurrentRow && Grid.GetColumn(frame) == i);
+
+                    if (targetFrame != null)
+                    {
+                        targetFrame.BackgroundColor = Color.FromArgb("#2A2A2A");
+                    }
+
+                    // Update the corresponding keyboard button's color to DarkGray and disable the button
+                    if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.BackgroundColor != Colors.Green && button.BackgroundColor != Colors.Gold)
+                    {
+                        button.BackgroundColor = Color.FromArgb("#2A2A2A");
                         button.IsEnabled = false;
                     }
                 }
             }
         }
+    private void StartGameTimer()
+        {
+            _startTime = DateTime.Now;
+
+            _gameTimer = new System.Timers.Timer(1000); // Update every second
+            _gameTimer.Elapsed += OnTimerElapsed;
+            _gameTimer.Start();
+        }
+        private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            TimeSpan elapsed = DateTime.Now - _startTime;
+
+            // Update the UI on the main thread
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ElapsedTimeLabel.Text = $"Elapsed Time: {elapsed:mm\\:ss}";
+            });
+        }
+        //protected override void OnDisappearing()
+        //{
+        //    base.OnDisappearing();
+        //    _gameTimer?.Stop();
+        //    _gameTimer?.Dispose();
+        //}
+
     }
 }

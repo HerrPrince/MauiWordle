@@ -36,6 +36,7 @@ namespace WordleApp.ViewModels
                 _isNameEntered = value;
                 OnPropertyChanged();
                 ((Command)StartGameCommand).ChangeCanExecute();
+                ((Command)ViewHistoryCommand).ChangeCanExecute();
             }
         }
 
@@ -49,20 +50,37 @@ namespace WordleApp.ViewModels
         {
             try
             {
-                // Navigate to the Game Screen using an absolute route
-                await Shell.Current.GoToAsync("///GameScreen");
+                // Pass the PlayerName to the GameScreen
+                var navigationParams = new Dictionary<string, object>
+        {
+            { "playerName", PlayerName }
+        };
+
+                await Shell.Current.GoToAsync("GameScreen", navigationParams);
             }
             catch (Exception ex)
             {
-                // Handle navigation exceptions
                 Console.WriteLine($"Navigation failed: {ex.Message}");
             }
         }
 
-        private void ViewHistory()
+        // Command logic for navigation
+        private async void ViewHistory()
         {
-            // Navigate to the history page
-            Application.Current.MainPage.DisplayAlert("Navigation", "View History clicked!", "OK");
+            try
+            {
+                // Pass PlayerName as a navigation parameter
+                var navigationParams = new Dictionary<string, object>
+        {
+            { "playerName", PlayerName }
+        };
+
+                await Shell.Current.GoToAsync("HistoryScreen", navigationParams);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Navigation to HistoryScreen failed: {ex.Message}");
+            }
         }
 
         private void OpenSettings()
@@ -73,7 +91,7 @@ namespace WordleApp.ViewModels
 
         private bool CanStartGame()
         {
-            return IsNameEntered;
+            return !string.IsNullOrWhiteSpace(PlayerName);
         }
     }
 }

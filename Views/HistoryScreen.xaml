@@ -1,0 +1,11 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WordleApp.Views.HistoryScreen"
+             Title="Wordle - History">
+    <VerticalStackLayout>
+        <Label Text="Game History"
+               FontSize="18"
+               HorizontalOptions="Center"/>
+        <!-- Add other history-related UI here -->
+    </VerticalStackLayout>
+</ContentPage>

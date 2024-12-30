@@ -4,10 +4,8 @@
        x:Class="WordleApp.AppShell">
 
     <!-- Register routes -->
-    <ShellContent Title="Start" 
-                  Route="StartScreen" 
-                  ContentTemplate="{DataTemplate local:StartScreen}" />
-    <ShellContent Title="Game" 
-                  Route="GameScreen" 
-                  ContentTemplate="{DataTemplate local:GameScreen}" />
+    <ShellContent Title="Start" Route="StartScreen" ContentTemplate="{DataTemplate local:StartScreen}" />
+    <ShellContent Title="Game" Route="GameScreen" ContentTemplate="{DataTemplate local:GameScreen}" />
+    <ShellContent Title="History" Route="HistoryScreen" ContentTemplate="{DataTemplate local:HistoryScreen}" />
+
 </Shell>

@@ -1,3 +1,6 @@
+using Microsoft.Maui.Controls;
+using WordleApp.ViewModels;
+
 namespace WordleApp.Views
 {
     public partial class StartScreen : ContentPage
@@ -5,7 +8,8 @@ namespace WordleApp.Views
         public StartScreen()
         {
             InitializeComponent();
-        }
+            BindingContext = new StartScreenViewModel();
+
         }
     }
 }

@@ -5,9 +5,9 @@
              Title="Wordle - Start">
 
     <ContentPage.Content>
-        <StackLayout Padding="20" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+        <VerticalStackLayout Spacing="10" Padding="20" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
             <!-- App Title -->
-            <Label Text="Wordle App" 
+            <Label Text="Welcome to Wordle!" 
                    FontSize="36" 
                    FontAttributes="Bold" 
                    HorizontalOptions="Center" />
@@ -32,6 +32,6 @@
             <Button Text="Settings"
                     Command="{Binding OpenSettingsCommand}"
                     Margin="0,10,0,0" />
-        </StackLayout>
+        </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

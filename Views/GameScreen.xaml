@@ -6,6 +6,14 @@
 
     <ContentPage.Content>
         <VerticalStackLayout Spacing="20" Padding="10">
+            <VerticalStackLayout Spacing="5" Padding="5">
+                <!-- Current Player -->
+                <Label x:Name="PlayerNameLabel" Text="Current Player: " FontSize="18" HorizontalOptions="Center" VerticalOptions="Start" />
+
+                <!-- Elapsed Time -->
+                <Label x:Name="ElapsedTimeLabel" Text="Elapsed Time: 00:00" FontSize="18" HorizontalOptions="Center" VerticalOptions="Start" />
+
+            </VerticalStackLayout>
             <!-- Letter Grid -->
             <Grid x:Name="LetterGrid" HorizontalOptions="Center" VerticalOptions="Center">
                 <Grid.RowDefinitions>
@@ -25,7 +33,6 @@
                 </Grid.ColumnDefinitions>
                 <!-- Populate the grid dynamically in code-behind -->
             </Grid>
-
             <!-- Keyboard -->
             <Grid x:Name="KeyboardGrid" HorizontalOptions="Center" VerticalOptions="End" RowSpacing="5" ColumnSpacing="5">
                 <Grid.RowDefinitions>
