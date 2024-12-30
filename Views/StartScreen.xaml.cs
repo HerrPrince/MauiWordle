@@ -5,7 +5,7 @@ namespace WordleApp.Views
         public StartScreen()
         {
             InitializeComponent();
-            BindingContext = new ViewModels.StartScreenViewModel();
+        }
         }
     }
 }
