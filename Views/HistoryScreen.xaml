@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WordleApp.Views.HistoryScreen"
              Title="Wordle - History"
-             BackgroundColor="Black">
+             BackgroundColor="{DynamicResource BackgroundColor}">
 
     <ContentPage.Content>
         <VerticalStackLayout Padding="20">
@@ -45,32 +45,32 @@
                     <!-- Header Row -->
                     <Label Text="Player Name"
                            FontSize="18"
-                           BackgroundColor="Gray"
-                           TextColor="White"
+                           BackgroundColor="{DynamicResource HeaderBackgroundColor}"
+                           TextColor="{DynamicResource HeaderTextColor}"
                            Padding="10, 5"
                            HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
                            Grid.Row="0" Grid.Column="0" />
                     <Label Text="Attempt Time"
                            FontSize="18"
-                           BackgroundColor="Gray"
-                           TextColor="White"
+                           BackgroundColor="{DynamicResource HeaderBackgroundColor}"
+                           TextColor="{DynamicResource HeaderTextColor}"
                            Padding="10, 5"
                            HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
                            Grid.Row="0" Grid.Column="1" />
                     <Label Text="Trials"
                            FontSize="18"
-                           BackgroundColor="Gray"
-                           TextColor="White"
+                           BackgroundColor="{DynamicResource HeaderBackgroundColor}"
+                           TextColor="{DynamicResource HeaderTextColor}"
                            Padding="10, 5"
                            HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
                            Grid.Row="0" Grid.Column="2" />
                     <Label Text="Game Date"
                            FontSize="18"
-                           BackgroundColor="Gray"
-                           TextColor="White"
+                           BackgroundColor="{DynamicResource HeaderBackgroundColor}"
+                           TextColor="{DynamicResource HeaderTextColor}"
                            Padding="10, 5"
                            HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
@@ -82,7 +82,7 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid RowSpacing="1" ColumnSpacing="1"
-                                      BackgroundColor="White">
+                                      BackgroundColor="{DynamicResource BorderColor}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="2*" />
                                         <ColumnDefinition Width="1.5*" />
@@ -92,33 +92,33 @@
 
                                     <Label Text="{Binding PlayerName}"
                                            FontSize="16"
-                                           BackgroundColor="Black"
-                                           TextColor="White"
+                                           BackgroundColor="{DynamicResource CellBackgroundColor}"
                                            Padding="10, 5"
+                                           Margin="0.2"
                                            HorizontalTextAlignment="Center"
                                            VerticalTextAlignment="Center"
                                            Grid.Column="0" />
                                     <Label Text="{Binding ElapsedTime, StringFormat='{}{0:mm\\:ss}'}"
                                            FontSize="16"
-                                           BackgroundColor="Black"
-                                           TextColor="White"
+                                           BackgroundColor="{DynamicResource CellBackgroundColor}"
                                            Padding="10, 5"
+                                           Margin="0.2"
                                            HorizontalTextAlignment="Center"
                                            VerticalTextAlignment="Center"
                                            Grid.Column="1" />
                                     <Label Text="{Binding Attempts}"
                                            FontSize="16"
-                                           BackgroundColor="Black"
-                                           TextColor="White"
+                                           BackgroundColor="{DynamicResource CellBackgroundColor}"
                                            Padding="10, 5"
+                                           Margin="0.2"
                                            HorizontalTextAlignment="Center"
                                            VerticalTextAlignment="Center"
                                            Grid.Column="2" />
                                     <Label Text="{Binding PlayedAt, StringFormat='{}{0:MM/dd/yyyy HH:mm}'}"
                                            FontSize="16"
-                                           BackgroundColor="Black"
-                                           TextColor="White"
+                                           BackgroundColor="{DynamicResource CellBackgroundColor}"
                                            Padding="10, 5"
+                                           Margin="0.2"
                                            HorizontalTextAlignment="Center"
                                            VerticalTextAlignment="Center"
                                            Grid.Column="3" />
@@ -128,6 +128,7 @@
                     </CollectionView>
                 </Grid>
             </HorizontalStackLayout>
+            <Button Text="Back" FontSize="15" Margin="0, 20, 0, 0" Padding="20, 10" HorizontalOptions="Center" Clicked="OnBackButtonClicked" />
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

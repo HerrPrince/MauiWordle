@@ -3,33 +3,92 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WordleApp.Views.SettingsScreen"
              Title="Wordle - Settings"
-             BackgroundColor="Black">
+             BackgroundColor="{DynamicResource BackgroundColor}">
 
-    <ContentPage.Content>
-        <VerticalStackLayout Spacing="20" Padding="20">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20" HorizontalOptions="Center">
+
+            <!-- Title -->
             <Label Text="Settings"
-                   FontSize="24"
+                   FontSize="30"
                    HorizontalOptions="Center"
-                   TextColor="Black" />
+                   Margin="0, 10, 0, 20" />
 
-            <!-- Add your settings options here -->
-            <Label Text="Option 1"
-                   FontSize="18"
-                   TextColor="Black" />
-            <Switch x:Name="Option1Switch" />
+            <!-- Settings Grid -->
+            <Grid ColumnSpacing="20" RowSpacing="20" WidthRequest="550">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <!-- Label Column -->
+                    <ColumnDefinition Width="3*" />
+                    <!-- Control Column -->
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <Label Text="Option 2"
-                   FontSize="18"
-                   TextColor="Black" />
-            <Switch x:Name="Option2Switch" />
+                <!-- Number of Attempts -->
+                <Label Text="Number of Attempts: 6"
+                       x:Name="AttemptsValueLabel"
+                       FontSize="18"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Grid.Row="0" Grid.Column="0" />
+                <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="5" HorizontalOptions="Start" WidthRequest="200" Padding="20">
+                    <Slider x:Name="AttemptsSlider"
+                            Minimum="1"
+                            Maximum="10"
+                            Value="6"
+                            ValueChanged="OnAttemptsSliderValueChanged" />
+                </VerticalStackLayout>
 
-            <!-- Back Button -->
-            <Button Text="Back"
-                    FontSize="18"
-                    BackgroundColor="LightGray"
-                    TextColor="Black"
+                <!-- Word Existence Check -->
+                <Label Text="Word Existence Check:"
+                       FontSize="18"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Grid.Row="1" Grid.Column="0" />
+                <Switch x:Name="WordExistenceSwitch"
+                        IsToggled="{Binding IsWordExistenceCheckEnabled}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Grid.Row="1" Grid.Column="1" />
+
+                <!-- Keyboard Disable Feature -->
+                <Label Text="Disable keys not in the target word:"
+                       FontSize="18"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Grid.Row="2" Grid.Column="0" />
+                <Switch x:Name="DisableKeySwitch"
+                        IsToggled="{Binding IsKeyDisableEnabled}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Grid.Row="2" Grid.Column="1" />
+
+                <!-- Dark Mode Switch -->
+                <Label Text="Enable Dark Mode:"
+                       FontSize="18"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center"
+                       Grid.Row="3" Grid.Column="0" />
+                <Switch x:Name="DarkModeSwitch"
+                        IsToggled="{Binding IsDarkModeEnabled}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Grid.Row="3" Grid.Column="1" />
+            </Grid>
+
+            <!-- Save Button -->
+            <Button Text="Save Settings"
+                    FontSize="15"
+                    Margin="0, 20, 0, 0"
+                    Padding="20, 10"
                     HorizontalOptions="Center"
                     Clicked="OnBackButtonClicked" />
+
         </VerticalStackLayout>
-    </ContentPage.Content>
+    </ScrollView>
 </ContentPage>

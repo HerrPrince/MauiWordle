@@ -2,7 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WordleApp.Views"
              x:Class="WordleApp.Views.StartScreen"
-             Title="Wordle - Start">
+             Title="Wordle - Start"
+             BackgroundColor="{DynamicResource BackgroundColor}">
 
     <ContentPage.Content>
         <VerticalStackLayout Spacing="10" Padding="20" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">

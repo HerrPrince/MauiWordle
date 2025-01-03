@@ -26,7 +26,7 @@ namespace WordleApp.Views
 
         private DateTime _startTime;
         private System.Timers.Timer _gameTimer;
-        private readonly int Rows = 6; // Number of attempts
+        private int Rows; // Number of attempts
         private readonly int Columns = 5; // Number of letters in the word
         private string TargetWord = "";
         private HashSet<string> WordList = new(); // Set of valid words
@@ -38,6 +38,7 @@ namespace WordleApp.Views
         public GameScreen()
         {
             InitializeComponent();
+            Rows = Math.Min(Math.Max(Preferences.Get("NumberOfAttempts", 6), 1), 10);
             LoadWordListAsync();
             BuildLetterGrid();
             BuildKeyboard();
@@ -85,6 +86,16 @@ namespace WordleApp.Views
         // Build the letter grid dynamically
         private void BuildLetterGrid()
         {
+            // Clear the existing grid
+            LetterGrid.Children.Clear();
+            LetterGrid.RowDefinitions.Clear();
+
+            // Dynamically define rows
+            for (int i = 0; i < Rows; i++)
+            {
+                LetterGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            }
+
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns; col++)
@@ -96,15 +107,15 @@ namespace WordleApp.Views
                         FontSize = 18, // Initial font size
                         HorizontalTextAlignment = TextAlignment.Center,
                         VerticalTextAlignment = TextAlignment.Center,
-                        TextColor = Colors.White,
+                        TextColor = (Color)Application.Current.Resources["BoxTextColor"],
                         LineBreakMode = LineBreakMode.NoWrap
                     };
 
                     // Create the Frame that holds the Label
                     var box = new Frame
                     {
-                        BackgroundColor = Colors.Black,
-                        BorderColor = Colors.Gray,
+                        BackgroundColor = (Color)Application.Current.Resources["CellBackgroundColor"],
+                        BorderColor = (Color)Application.Current.Resources["BorderColor"],
                         CornerRadius = 0, // To make it look square
                         WidthRequest = 50,
                         HeightRequest = 50,
@@ -154,8 +165,8 @@ namespace WordleApp.Views
                     {
                         Text = letterString,
                         FontSize = 18,
-                        BackgroundColor = Colors.Gray,
-                        TextColor = Colors.White,
+                        BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
+                        TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
                         CornerRadius = 5,
                         WidthRequest = 40,
                         HeightRequest = 50,
@@ -186,8 +197,8 @@ namespace WordleApp.Views
             {
                 Text = "Enter",
                 FontSize = 16,
-                BackgroundColor = Colors.Gray,
-                TextColor = Colors.White,
+                BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
+                TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
                 CornerRadius = 5,
                 WidthRequest = 80, // Adjusted width for better fit
                 HeightRequest = 50,
@@ -208,8 +219,8 @@ namespace WordleApp.Views
                 {
                     Text = letterString,
                     FontSize = 18,
-                    BackgroundColor = Colors.Gray,
-                    TextColor = Colors.White,
+                    BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
+                    TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
                     CornerRadius = 5,
                     WidthRequest = 40,
                     HeightRequest = 50,
@@ -229,8 +240,8 @@ namespace WordleApp.Views
             {
                 Text = "Delete",
                 FontSize = 16,
-                BackgroundColor = Colors.Gray,
-                TextColor = Colors.White,
+                BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
+                TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
                 CornerRadius = 5,
                 WidthRequest = 80, // Adjusted width for better fit
                 HeightRequest = 50,
@@ -264,8 +275,9 @@ namespace WordleApp.Views
                 return;
             }
 
+            bool isWordExistenceCheckEnabled = Preferences.Get("IsWordExistenceCheckEnabled", true);
             // Check if the word exists in the word list
-            if (!WordList.Contains(currentWord))
+            if (isWordExistenceCheckEnabled && !WordList.Contains(currentWord))
             {
                 await DisplayAlert("Invalid Word", "This word is not in the word list. Try again.", "OK");
                 return;
@@ -361,36 +373,13 @@ namespace WordleApp.Views
 
             if (guessedWord.Equals(TargetWord, StringComparison.OrdinalIgnoreCase))
             {
-                // Stop the timer
-                _gameTimer?.Stop();
+                HandleGameWin();
+                return;
+            }
 
-                // Disable all keyboard inputs
-                foreach (var button in KeyboardButtons.Values)
-                {
-                    button.IsEnabled = false;
-                }
-
-                // Update the timer label to "YOU WIN"
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    PlayerNameLabel.Text = "YOU WIN!";
-                    ElapsedTimeLabel.IsVisible = false;
-                    PlayAgainButton.IsVisible = true;
-                });
-
-                // Show congratulations popup
-                TimeSpan elapsedTime = DateTime.Now - _startTime;
-                DisplayCongratulationsPopup(elapsedTime);
-
-                // Save the record
-                GameHistoryService.SaveRecord(new GameRecord
-                {
-                    PlayerName = PlayerName,
-                    ElapsedTime = elapsedTime,
-                    Attempts = CurrentRow + 1,
-                    PlayedAt = DateTime.Now
-                });
-
+            if (CurrentRow + 1 >= Rows)
+            {
+                HandleGameOver();
                 return;
             }
 
@@ -460,6 +449,8 @@ namespace WordleApp.Views
             }
 
             // Third pass: Mark incorrect letters (DarkGray)
+            bool isKeyDisableEnabled = Preferences.Get("IsKeyDisableEnabled", true);
+
             for (int i = 0; i < guessedWord.Length; i++)
             {
                 if (!guessedMatched[i]) // If the letter wasn't matched
@@ -474,21 +465,162 @@ namespace WordleApp.Views
                     }
 
                     // Update the corresponding keyboard button's color to DarkGray and disable the button
-                    if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.BackgroundColor != Colors.Green && button.BackgroundColor != Colors.Gold)
+                    if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button))
                     {
-                        button.BackgroundColor = Color.FromArgb("#2A2A2A");
-                        button.IsEnabled = false;
+                        if (button.BackgroundColor != Colors.Green && button.BackgroundColor != Colors.Gold)
+                        {
+                            button.BackgroundColor = Color.FromArgb("#2A2A2A");
+
+                            if (isKeyDisableEnabled && button.IsEnabled != false)
+                            {
+                                button.IsEnabled = false; // Disable incorrect keys
+                                button.BackgroundColor = Color.FromArgb("#2A2A2A");
+                            }
+                        }
                     }
                 }
             }
         }
-        private async void DisplayCongratulationsPopup(TimeSpan elapsedTime)
+        private async void HandleGameWin()
         {
-            string message = $"Congratulations, {PlayerName}!\n" +
-                             $"Time: {elapsedTime:mm\\:ss}\n" +
-                             $"Attempts: {CurrentRow + 1}";
+            // Stop the timer
+            _gameTimer?.Stop();
 
-            await DisplayAlert("You Win!", message, "OK");
+            // Disable all keyboard inputs
+            foreach (var button in KeyboardButtons.Values)
+            {
+                button.IsEnabled = false;
+            }
+
+            // Update the timer label to "YOU WIN"
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                PlayerNameLabel.Text = "YOU WON!";
+                ElapsedTimeLabel.IsVisible = false;
+                PlayAgainButton.IsVisible = true;
+            });
+
+            // Change the background of all boxes in the current row to green
+            foreach (var frame in LetterGrid.Children.OfType<Frame>()
+                     .Where(f => Grid.GetRow(f) == CurrentRow))
+            {
+                frame.BackgroundColor = Colors.Green;
+            }
+
+            // Show congratulations popup
+            TimeSpan elapsedTime = DateTime.Now - _startTime;
+            string message = $"Congratulations, {PlayerName}!\n" +
+                 $"Time: {elapsedTime:mm\\:ss}\n" +
+                 $"Attempts: {CurrentRow + 1}";
+
+            await DisplayAlert("You Won!", message, "OK");
+
+            // Save the record
+            GameHistoryService.SaveRecord(new GameRecord
+            {
+                PlayerName = PlayerName,
+                ElapsedTime = elapsedTime,
+                Attempts = CurrentRow + 1,
+                PlayedAt = DateTime.Now
+            });
+        }
+        private async void HandleGameOver()
+        {
+            // Stop the timer
+            _gameTimer?.Stop();
+
+            // Disable all keyboard inputs
+            foreach (var button in KeyboardButtons.Values)
+            {
+                button.IsEnabled = false;
+            }
+
+            // Update the timer label to "YOU LOST"
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                PlayerNameLabel.Text = "YOU LOST!";
+                ElapsedTimeLabel.IsVisible = false;
+                PlayAgainButton.IsVisible = true;
+            });
+
+            // Apply coloring logic to the last row
+            string guessedWord = string.Concat(
+                LetterGrid.Children
+                    .OfType<Frame>()
+                    .Where(frame => Grid.GetRow(frame) == CurrentRow)
+                    .Select(frame => (frame.Content as Label)?.Text ?? "")
+            );
+
+            // Create a copy of the target word to track matches
+            char[] targetWordArray = TargetWord.ToUpper().ToCharArray();
+            bool[] matched = new bool[Columns];
+            bool[] guessedMatched = new bool[Columns];
+
+            // First pass: Correct letters in correct positions (Green)
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                if (i < targetWordArray.Length && guessedWord[i] == targetWordArray[i])
+                {
+                    matched[i] = true;
+                    guessedMatched[i] = true;
+
+                    var frame = LetterGrid.Children
+                        .OfType<Frame>()
+                        .FirstOrDefault(f => Grid.GetRow(f) == CurrentRow && Grid.GetColumn(f) == i);
+
+                    if (frame != null)
+                    {
+                        frame.BackgroundColor = Colors.Green;
+                    }
+                }
+            }
+
+            // Second pass: Correct letters in wrong positions (Gold)
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                if (!guessedMatched[i] && i < targetWordArray.Length)
+                {
+                    for (int j = 0; j < targetWordArray.Length; j++)
+                    {
+                        if (!matched[j] && guessedWord[i] == targetWordArray[j])
+                        {
+                            matched[j] = true;
+                            guessedMatched[i] = true;
+
+                            var frame = LetterGrid.Children
+                                .OfType<Frame>()
+                                .FirstOrDefault(f => Grid.GetRow(f) == CurrentRow && Grid.GetColumn(f) == i);
+
+                            if (frame != null)
+                            {
+                                frame.BackgroundColor = Colors.Gold;
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Third pass: Incorrect letters (DarkGray)
+            for (int i = 0; i < guessedWord.Length; i++)
+            {
+                if (!guessedMatched[i])
+                {
+                    var frame = LetterGrid.Children
+                        .OfType<Frame>()
+                        .FirstOrDefault(f => Grid.GetRow(f) == CurrentRow && Grid.GetColumn(f) == i);
+
+                    if (frame != null)
+                    {
+                        frame.BackgroundColor = Color.FromArgb("#2A2A2A");
+                    }
+                }
+            }
+
+            // Show the "Game Over" popup
+            string message = $"Game Over!\nThe correct word was: {TargetWord}.\nBetter luck next time.";
+            await DisplayAlert("You Lost!", message, "OK");
         }
         private void OnPlayAgainClicked(object sender, EventArgs e)
         {
@@ -502,6 +634,7 @@ namespace WordleApp.Views
         private void ResetGame()
         {
             // Reset game state
+            Rows = Math.Min(Math.Max(Preferences.Get("NumberOfAttempts", 6), 1), 10);
             CurrentRow = 0;
             CurrentColumn = 0;
             TargetWord = WordList.ElementAt(new Random().Next(WordList.Count));
@@ -522,7 +655,7 @@ namespace WordleApp.Views
             foreach (var button in KeyboardButtons.Values)
             {
                 button.IsEnabled = true;
-                //button.BackgroundColor = Colors.Gray;
+                button.BackgroundColor = Colors.Gray;
             }
 
             // Restart the timer
@@ -536,7 +669,7 @@ namespace WordleApp.Views
             _gameTimer.Elapsed += OnTimerElapsed;
             _gameTimer.Start();
         }
-        private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void OnTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             TimeSpan elapsed = DateTime.Now - _startTime;
 
