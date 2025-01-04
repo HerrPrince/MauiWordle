@@ -22,7 +22,7 @@
                 <Label x:Name="ElapsedTimeLabel" Text="Elapsed Time: 00:00" FontSize="18" HorizontalOptions="Center" VerticalOptions="Start" />
 
                 <!-- Play Again Button -->
-                <Button x:Name="PlayAgainButton" Text="Play Again" FontSize="16" HorizontalOptions="Center" VerticalOptions="Start" IsVisible="False" Clicked="OnPlayAgainClicked" Margin="0, 10, 0, 0"/>
+                <Button x:Name="PlayAgainButton" Style="{StaticResource BlueEnabledButton}" Text="Play Again" FontSize="16" HorizontalOptions="Center" VerticalOptions="Start" IsVisible="False" Clicked="OnPlayAgainClicked" Margin="0, 10, 0, 0"/>
 
             </VerticalStackLayout>
             <ScrollView Grid.Row="1" Padding="10" VerticalOptions="FillAndExpand">

@@ -9,7 +9,8 @@
         <VerticalStackLayout Spacing="10" Padding="20" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
             <!-- App Title -->
             <Label Text="Welcome to Wordle!" 
-                   FontSize="36" 
+                   FontSize="36"
+                   Padding="20"
                    FontAttributes="Bold" 
                    HorizontalOptions="Center" />
 
@@ -21,18 +22,21 @@
 
             <!-- Start Game Button -->
             <Button Text="Start Game"
+                    Style="{StaticResource BlueEnabledButton}"
                     Command="{Binding StartGameCommand}" 
-                    IsEnabled="{Binding IsNameEntered}" />
+                    IsEnabled="{Binding IsNameEntered}"/>
 
             <!-- View History Button -->
             <Button Text="View History"
+                    Style="{StaticResource BlueEnabledButton}"
                     Command="{Binding ViewHistoryCommand}"
-                    Margin="0,10,0,0" />
+                    Margin="0,15,0,0" />
 
             <!-- Settings Button -->
             <Button Text="Settings"
+                    Style="{StaticResource BlueEnabledButton}"
                     Command="{Binding OpenSettingsCommand}"
-                    Margin="0,10,0,0" />
+                    Margin="0,15,0,0" />
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

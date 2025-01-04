@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using WordleApp.Services;
 using WordleApp.Models;
+using Microsoft.Maui.Graphics.Text;
 
 namespace WordleApp.Views
 {
@@ -76,7 +77,7 @@ namespace WordleApp.Views
             {
                 Random random = new();
                 TargetWord = WordList.ElementAt(random.Next(WordList.Count));
-                await DisplayAlert("Word", $"TargetWord: {TargetWord}", "OK"); // Debugging
+                //await DisplayAlert("Word", $"TargetWord: {TargetWord}", "OK"); // Debugging
             }
             else
             {
@@ -165,8 +166,7 @@ namespace WordleApp.Views
                     {
                         Text = letterString,
                         FontSize = 18,
-                        BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
-                        TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
+                        Style = (Style)Application.Current.Resources["GrayEnabledButton"],
                         CornerRadius = 5,
                         WidthRequest = 40,
                         HeightRequest = 50,
@@ -197,8 +197,7 @@ namespace WordleApp.Views
             {
                 Text = "Enter",
                 FontSize = 16,
-                BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
-                TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
+                Style = (Style)Application.Current.Resources["EnterButton"],
                 CornerRadius = 5,
                 WidthRequest = 80, // Adjusted width for better fit
                 HeightRequest = 50,
@@ -219,8 +218,7 @@ namespace WordleApp.Views
                 {
                     Text = letterString,
                     FontSize = 18,
-                    BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
-                    TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
+                    Style = (Style)Application.Current.Resources["GrayEnabledButton"],
                     CornerRadius = 5,
                     WidthRequest = 40,
                     HeightRequest = 50,
@@ -240,8 +238,7 @@ namespace WordleApp.Views
             {
                 Text = "Delete",
                 FontSize = 16,
-                BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColor"],
-                TextColor = (Color)Application.Current.Resources["KeyboardTextColor"],
+                Style = (Style)Application.Current.Resources["DeleteButton"],
                 CornerRadius = 5,
                 WidthRequest = 80, // Adjusted width for better fit
                 HeightRequest = 50,
@@ -350,15 +347,14 @@ namespace WordleApp.Views
                 if (CurrentColumn == Columns)
                 {
                     KeyboardButtons["Enter"].IsEnabled = true;
-                    KeyboardButtons["Enter"].BackgroundColor = Colors.Green;
                 }
 
                 // Enable and change the "Delete" button color to red if there's input to delete
                 if (CurrentColumn > 0)
                 {
-                    KeyboardButtons["Delete"].BackgroundColor = Colors.Red;
                     KeyboardButtons["Delete"].IsEnabled = true;
                 }
+
             }
         }
         private void CheckWord()
@@ -403,13 +399,13 @@ namespace WordleApp.Views
 
                     if (targetFrame != null)
                     {
-                        targetFrame.BackgroundColor = Colors.Green;
+                        targetFrame.BackgroundColor = (Color)Application.Current.Resources["EnterGreenActive"];
                     }
 
                     // Update the corresponding keyboard button's color if not already Green
-                    if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.BackgroundColor != Colors.Green)
+                    if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.Style != (Style)Application.Current.Resources["EnterButton"])
                     {
-                        button.BackgroundColor = Colors.Green;
+                        button.Style = (Style)Application.Current.Resources["EnterButton"];
                     }
                 }
             }
@@ -433,15 +429,14 @@ namespace WordleApp.Views
 
                             if (targetFrame != null)
                             {
-                                targetFrame.BackgroundColor = Colors.Gold;
+                                targetFrame.BackgroundColor = (Color)Application.Current.Resources["LetterGoldActive"];
                             }
 
                             // Update the corresponding keyboard button's color if not already Green
-                            if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.BackgroundColor != Colors.Green)
+                            if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button) && button.Style != (Style)Application.Current.Resources["EnterButton"])
                             {
-                                button.BackgroundColor = Colors.Gold;
+                                button.Style = (Style)Application.Current.Resources["GoldButton"];
                             }
-
                             break;
                         }
                     }
@@ -461,20 +456,19 @@ namespace WordleApp.Views
 
                     if (targetFrame != null)
                     {
-                        targetFrame.BackgroundColor = Color.FromArgb("#2A2A2A");
+                        targetFrame.BackgroundColor = (Color)Application.Current.Resources["LetterIncorrect"];
                     }
 
                     // Update the corresponding keyboard button's color to DarkGray and disable the button
                     if (KeyboardButtons.TryGetValue(guessedWord[i].ToString(), out Button button))
                     {
-                        if (button.BackgroundColor != Colors.Green && button.BackgroundColor != Colors.Gold)
+                        if (button.Style != (Style)Application.Current.Resources["EnterButton"] && button.Style != (Style)Application.Current.Resources["GoldButton"])
                         {
-                            button.BackgroundColor = Color.FromArgb("#2A2A2A");
+                            button.BackgroundColor = (Color)Application.Current.Resources["KeyboardBackgroundColorInactive"];
 
                             if (isKeyDisableEnabled && button.IsEnabled != false)
                             {
                                 button.IsEnabled = false; // Disable incorrect keys
-                                button.BackgroundColor = Color.FromArgb("#2A2A2A");
                             }
                         }
                     }
@@ -504,7 +498,7 @@ namespace WordleApp.Views
             foreach (var frame in LetterGrid.Children.OfType<Frame>()
                      .Where(f => Grid.GetRow(f) == CurrentRow))
             {
-                frame.BackgroundColor = Colors.Green;
+                frame.BackgroundColor = (Color)Application.Current.Resources["EnterGreenActive"];
             }
 
             // Show congratulations popup
@@ -570,7 +564,7 @@ namespace WordleApp.Views
 
                     if (frame != null)
                     {
-                        frame.BackgroundColor = Colors.Green;
+                        frame.BackgroundColor = (Color)Application.Current.Resources["EnterGreenActive"];
                     }
                 }
             }
@@ -593,7 +587,7 @@ namespace WordleApp.Views
 
                             if (frame != null)
                             {
-                                frame.BackgroundColor = Colors.Gold;
+                                frame.BackgroundColor = (Color)Application.Current.Resources["LetterGoldActive"];
                             }
 
                             break;
@@ -613,7 +607,7 @@ namespace WordleApp.Views
 
                     if (frame != null)
                     {
-                        frame.BackgroundColor = Color.FromArgb("#2A2A2A");
+                        frame.BackgroundColor = (Color)Application.Current.Resources["LetterIncorrect"];
                     }
                 }
             }
@@ -638,7 +632,7 @@ namespace WordleApp.Views
             CurrentRow = 0;
             CurrentColumn = 0;
             TargetWord = WordList.ElementAt(new Random().Next(WordList.Count));
-            DisplayAlert("Word", $"TargetWord: {TargetWord}", "OK"); // Debugging
+            //DisplayAlert("Word", $"TargetWord: {TargetWord}", "OK"); // Debugging
 
             // Clear the grid
             foreach (var frame in LetterGrid.Children.OfType<Frame>())
@@ -655,7 +649,7 @@ namespace WordleApp.Views
             foreach (var button in KeyboardButtons.Values)
             {
                 button.IsEnabled = true;
-                button.BackgroundColor = Colors.Gray;
+                button.Style = (Style)Application.Current.Resources["GrayEnabledButton"];
             }
 
             // Restart the timer

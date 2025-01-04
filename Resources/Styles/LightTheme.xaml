@@ -35,8 +35,17 @@
 
     <!-- Game Colors -->
     <Color x:Key="BoxTextColor">#000000</Color>
-    <Color x:Key="KeyboardBackgroundColor">#808080</Color>
+    <Color x:Key="KeyboardBackgroundColorActive">#808080</Color>
+    <Color x:Key="KeyboardBackgroundColorPressed">#A9A9A9</Color>
+    <Color x:Key="KeyboardBackgroundColorInactive">#404040</Color>
     <Color x:Key="KeyboardTextColor">#FFFFFF</Color>
+    <Color x:Key="EnterGreenActive">#0eff00</Color>
+    <Color x:Key="EnterGreenPressed">#089000</Color>
+    <Color x:Key="DeleteRedActive">#ff0000</Color>
+    <Color x:Key="DeleteRedPressed">#b10000</Color>
+    <Color x:Key="LetterGoldActive">#ffe200</Color>
+    <Color x:Key="LetterGoldPressed">#bda800</Color>
+    <Color x:Key="LetterIncorrect">#808080</Color>
 
     <!-- Entry Field Colors -->
     <Color x:Key="EntryBackgroundColor">#F7F7F7</Color>
@@ -49,7 +58,7 @@
         <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
     </Style>
 
-    <Style TargetType="Button">
+    <Style x:Key="BlueEnabledButton" TargetType="Button">
         <Setter Property="BackgroundColor" Value="{StaticResource ButtonBackgroundColorInactive}" />
         <Setter Property="TextColor" Value="{StaticResource ButtonTextColorInative}" />
         <Style.Triggers>
@@ -59,6 +68,62 @@
             </Trigger>
             <Trigger TargetType="Button" Property="IsPressed" Value="True">
                 <Setter Property="BackgroundColor" Value="{StaticResource ButtonBackgroundColorHover}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="GrayEnabledButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource KeyboardBackgroundColorInactive}" />
+        <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource KeyboardBackgroundColorActive}" />
+                <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource KeyboardBackgroundColorPressed}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="EnterButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource KeyboardBackgroundColorInactive}" />
+        <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource EnterGreenActive}" />
+                <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource EnterGreenPressed}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="DeleteButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource KeyboardBackgroundColorInactive}" />
+        <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource DeleteRedActive}" />
+                <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource DeleteRedPressed}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="GoldButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource KeyboardBackgroundColorInactive}" />
+        <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource LetterGoldActive}" />
+                <Setter Property="TextColor" Value="{StaticResource KeyboardTextColor}" />
+            </Trigger>
+            <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource LetterGoldPressed}" />
             </Trigger>
         </Style.Triggers>
     </Style>

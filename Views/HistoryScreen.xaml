@@ -128,7 +128,7 @@
                     </CollectionView>
                 </Grid>
             </HorizontalStackLayout>
-            <Button Text="Back" FontSize="15" Margin="0, 20, 0, 0" Padding="20, 10" HorizontalOptions="Center" Clicked="OnBackButtonClicked" />
+            <Button Style="{StaticResource BlueEnabledButton}" Text="Back" FontSize="15" Margin="0, 20, 0, 0" Padding="20, 10" HorizontalOptions="Center" Clicked="OnBackButtonClicked" />
         </VerticalStackLayout>
     </ContentPage.Content>
 </ContentPage>

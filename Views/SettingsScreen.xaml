@@ -83,6 +83,7 @@
 
             <!-- Save Button -->
             <Button Text="Save Settings"
+                    Style="{StaticResource BlueEnabledButton}"
                     FontSize="15"
                     Margin="0, 20, 0, 0"
                     Padding="20, 10"
